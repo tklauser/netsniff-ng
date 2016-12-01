@@ -18,6 +18,7 @@ HAVE_HWTSTAMP=0
 HAVE_LIBGEOIP=0
 HAVE_LIBZ=0
 HAVE_TPACKET3=0
+HAVE_BPF_PERF=0
 
 DISABLE_LIBNL=0
 DISABLE_GEOIP=0
@@ -322,6 +323,45 @@ EOF
 	else
 		echo "[YES]"
 		# HAVE_LIBNL already set by check_libnl()
+	fi
+}
+
+check_bpf_perf()
+{
+	echo -n "[*] Checking bpf/perf ... "
+	cat > $TMPDIR/bpfperftest.c << EOF
+#include <asm/unistd.h>
+#include <linux/bpf.h>
+#include <linux/perf_event.h>
+
+#ifndef __NR_perf_event_open
+# error "__NR_perf_event_open not provided by kernel uapi"
+#endif
+
+#ifndef __NR_bpf
+# error "__NR_bpf not provided by kernel uapi"
+#endif
+
+int main(void)
+{
+	int foo[] = {
+		BPF_PROG_TYPE_SCHED_CLS,
+		PERF_COUNT_SW_BPF_OUTPUT
+	};
+
+	return 0;
+}
+EOF
+
+	$CC -o $TMPDIR/bpfperftest $TMPDIR/bpfperftest.c >> config.log 2>&1
+	if [ ! -x $TMPDIR/bpfperftest ] ; then
+		echo "[NO]"
+		echo "CONFIG_BPF_PERF=0" >> Config
+		MISSING_DEFS=1
+	else
+		echo "[YES]"
+		echo "CONFIG_BPF_PERF=1" >> Config
+		HAVE_BPF_PERF=1
 	fi
 }
 
@@ -736,6 +776,12 @@ gen_config_hdr()
 		_have_tp3="/* HAVE_TPACKET3 is not defined */"
 	fi
 
+	if [ "$HAVE_BPF_PERF" == "1" ] ; then
+		_have_bpf_perf="#define HAVE_BPF_PERF 1"
+	else
+		_have_bpf_perf="/* HAVE_BPF_PERF is not defined */"
+	fi
+
 	cat > config.h << EOF
 #ifndef CONFIG_H
 #define CONFIG_H
@@ -751,6 +797,7 @@ $_have_libgeoip
 $_have_libz
 $_have_hwts
 $_have_tp3
+$_have_bpf_perf
 #endif /* CONFIG_H */
 EOF
 }
@@ -773,6 +820,7 @@ check_libnl
 check_libnl_route
 check_tpacket_v2
 check_tpacket_v3
+check_bpf_perf
 check_libnf_ct
 check_ncurses
 check_libgeoip
