@@ -33,6 +33,7 @@
 #include "privs.h"
 #include "proc.h"
 #include "bpf.h"
+#include "bpf_perf.h"
 #include "ioops.h"
 #include "die.h"
 #include "irq.h"

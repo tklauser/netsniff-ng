@@ -71,6 +71,9 @@ netsniff-ng-objs =	dissector.o \
 ifeq ($(CONFIG_LIBPCAP), 1)
 netsniff-ng-objs +=	bpf_comp.o
 endif
+ifeq ($(CONFIG_BPF_PERF), 1)
+netsniff-ng-objs +=	bpf_perf.o
+endif
 ifeq ($(CONFIG_GEOIP), 1)
 netsniff-ng-objs +=	geoip.o
 endif
