@@ -379,7 +379,11 @@ static inline u64 cpu_to_le64(u64 val)
 #endif
 
 #ifndef PACKET_QDISC_BYPASS
-# define PACKET_QDISC_BYPASS 20
+# define PACKET_QDISC_BYPASS		20
+#endif
+
+#ifndef PACKET_XMIT_RECEIVE
+# define PACKET_XMIT_RECEIVE		23
 #endif
 
 #ifndef ARPHRD_IEEE802154_MONITOR

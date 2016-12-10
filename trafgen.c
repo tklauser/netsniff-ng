@@ -79,7 +79,7 @@ struct shaper {
 };
 
 struct ctx {
-	bool rand, rfraw, jumbo_support, verbose, smoke_test, enforce, qdisc_path;
+	bool rand, rfraw, jumbo_support, verbose, smoke_test, enforce, qdisc_path, xmit_receive;
 	size_t reserve_size;
 	unsigned long num;
 	unsigned int cpus;
@@ -106,7 +106,7 @@ size_t plen = 0;
 struct packet_dyn *packet_dyn = NULL;
 size_t dlen = 0;
 
-static const char *short_options = "d:c:n:t:vJhS:rk:i:o:VRs:P:eE:pu:g:CHQqD:b:";
+static const char *short_options = "d:c:n:t:vJhS:rk:i:o:VRs:P:eE:pu:g:CHQqxD:b:";
 static const struct option long_options[] = {
 	{"dev",			required_argument,	NULL, 'd'},
 	{"out",			required_argument,	NULL, 'o'},
@@ -126,6 +126,7 @@ static const struct option long_options[] = {
 	{"notouch-irq",		no_argument,		NULL, 'Q'},
 	{"no-sock-mem", 	no_argument,		NULL, 'A'},
 	{"qdisc-path",		no_argument,		NULL, 'q'},
+	{"xmit-receive",	no_argument,		NULL, 'x'},
 	{"jumbo-support",	no_argument,		NULL, 'J'},
 	{"no-cpu-stats",	no_argument,		NULL, 'C'},
 	{"cpp",			no_argument,		NULL, 'p'},
@@ -205,6 +206,7 @@ static void __noreturn help(void)
 	     "  -A|--no-sock-mem               Don't tune core socket memory\n"
 	     "  -Q|--notouch-irq               Do not touch IRQ CPU affinity of NIC\n"
 	     "  -q|--qdisc-path                Enable qdisc kernel path (default off since 3.14)\n"
+	     "  -x|--xmit-receive              Loop back packets into RX path instead of sending\n"
 	     "  -V|--verbose                   Be more verbose\n"
 	     "  -C|--no-cpu-stats              Do not print CPU time statistics on exit\n"
 	     "  -v|--version                   Show version and exit\n"
@@ -943,6 +945,9 @@ static void main_loop(struct ctx *ctx, char *confname, bool slow,
 	if (ctx->qdisc_path == false)
 		set_sock_qdisc_bypass(sock, ctx->verbose);
 
+	if (ctx->xmit_receive)
+		set_sock_xmit_receive(sock, ctx->verbose);
+
 	if (slow)
 		xmit_slowpath_or_die(ctx, cpu, orig_num);
 	else
@@ -996,6 +1001,7 @@ int main(int argc, char **argv)
 	ctx.uid = getuid();
 	ctx.gid = getgid();
 	ctx.qdisc_path = false;
+	ctx.xmit_receive = false;
 
 	/* Keep an initial small default size to reduce cache-misses. */
 	ctx.reserve_size = 512 * (1 << 10);
@@ -1045,6 +1051,15 @@ int main(int argc, char **argv)
 			break;
 		case 'q':
 			ctx.qdisc_path = true;
+			break;
+		case 'x':
+			/* PACKET_QDISC_BYPASS and PACKET_XMIT_RECEIVE are
+			 * mutually exclusive. Thus, don't set
+			 * PACKET_QDISC_BYPASS if PACKET_XMIT_RECEIVE is
+			 * requested.
+			 */
+			ctx.qdisc_path = true;
+			ctx.xmit_receive = true;
 			break;
 		case 'r':
 			ctx.rand = true;

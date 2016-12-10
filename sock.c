@@ -74,6 +74,21 @@ void set_sock_qdisc_bypass(int fd, bool verbose)
 		if (verbose) printf("Enabled kernel qdisc bypass\n");
 }
 
+/* Experimental, not yet in mainline. */
+void set_sock_xmit_receive(int fd, bool verbose)
+{
+	int ret, val = 1;
+
+	ret = setsockopt(fd, SOL_PACKET, PACKET_XMIT_RECEIVE, &val, sizeof(val));
+	if (ret < 0) {
+		if (errno == ENOPROTOOPT) {
+			panic("No kernel support for PACKET_XMIT_RECEIVE\n");
+		} else
+			perror("Cannot set PACKET_XMIT_RECEIVE");
+	} else
+		if (verbose) printf("Enabled kernel xmit receive loopback\n");
+}
+
 void set_sock_prio(int fd, int prio)
 {
 	int ret, val = prio;

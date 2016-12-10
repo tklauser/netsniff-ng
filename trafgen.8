@@ -178,6 +178,14 @@ which trafgen enables by default.  This options disables the qdisc bypass,
 and uses the normal send path through the kernel's qdisc (traffic control)
 layer, which can be usefully for testing the qdisc path.
 .PP
+.SS -x, --xmit-receive
+Since Linux 4.xy, the kernel supports a socket option PACKET_XMIT_RECEIVE.
+If this options is enabled the packets written to the TX_RING are directly
+looped back to the RX path of the device instead of being passed to the device
+driver. This behavior can be useful for testing the network stack above the
+device driver on the same host that trafgen is running. Note: this option
+implies the -q, --qdisc-path option.
+.PP
 .SS -V, --verbose
 Let trafgen be more talkative and let it print the parsed configuration and
 some ring buffer statistics.
