@@ -178,6 +178,13 @@ which trafgen enables by default.  This options disables the qdisc bypass,
 and uses the normal send path through the kernel's qdisc (traffic control)
 layer, which can be usefully for testing the qdisc path.
 .PP
+.SS -B, --rx-pump-back
+Since Linux 4.xy, the kernel supports a socket option PACKET_RX_PUMP_BACK.
+If this options is enabled the packets written to the TX_RING are directly
+pumped back to the RX path of the device instead of being passed to the device.
+This behavior can be useful for testing the network stack above the device
+driver on the same host that trafgen is running.
+.PP
 .SS -V, --verbose
 Let trafgen be more talkative and let it print the parsed configuration and
 some ring buffer statistics.
