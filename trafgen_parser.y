@@ -744,7 +744,8 @@ proto
 	;
 
 field_expr
-	: '[' skip_white number skip_white ']'
+	: /* empty */ { }
+	| '[' skip_white number skip_white ']'
 		{ field_index_validate(field_expr.field, $3, 1);
 		  field_expr.type |= FIELD_EXPR_OFFSET;
 		  field_expr.val.func.offset = $3;
@@ -823,8 +824,6 @@ eth_field
 eth_expr
 	: eth_field field_expr skip_white '=' skip_white field_value_expr
 		{ proto_field_expr_eval(); }
-	| eth_field skip_white '=' skip_white field_value_expr
-		{ proto_field_expr_eval(); }
 	;
 
 pause_proto
@@ -848,8 +847,6 @@ pause_field
 
 pause_expr
 	: pause_field field_expr skip_white '=' skip_white field_value_expr
-		{ proto_field_expr_eval(); }
-	| pause_field skip_white '=' skip_white field_value_expr
 		{ proto_field_expr_eval(); }
 	;
 
@@ -887,8 +884,6 @@ pfc_field
 pfc_expr
 	: pfc_field field_expr skip_white '=' skip_white field_value_expr
 		{ proto_field_expr_eval(); }
-	| pfc_field skip_white '=' skip_white field_value_expr
-		{ proto_field_expr_eval(); }
 	;
 
 vlan_proto
@@ -920,8 +915,6 @@ vlan_field
 
 vlan_expr
 	: vlan_field field_expr skip_white '=' skip_white field_value_expr
-		{ proto_field_expr_eval(); }
-	| vlan_field skip_white '=' skip_white field_value_expr
 		{ proto_field_expr_eval(); }
 	| K_1Q
 		{ proto_hdr_field_set_be16(hdr, VLAN_TPID, ETH_P_8021Q); }
@@ -958,8 +951,6 @@ mpls_field
 mpls_expr
 	: mpls_field field_expr skip_white '=' skip_white field_value_expr
 		{ proto_field_expr_eval(); }
-	| mpls_field skip_white '=' skip_white field_value_expr
-		{ proto_field_expr_eval(); }
 	;
 
 arp_proto
@@ -990,12 +981,7 @@ arp_field
 arp_expr
 	: arp_field field_expr skip_white '=' skip_white field_value_expr
 		{ proto_field_expr_eval(); }
-	| arp_field skip_white '=' skip_white field_value_expr
-		{ proto_field_expr_eval(); }
 	| K_OPER field_expr skip_white '=' skip_white field_value_expr
-		{ proto_field_set(ARP_OPER);
-		  proto_field_expr_eval(); }
-	| K_OPER skip_white '=' skip_white field_value_expr
 		{ proto_field_set(ARP_OPER);
 		  proto_field_expr_eval(); }
 	| K_OPER skip_white '=' skip_white K_REQUEST
@@ -1042,8 +1028,6 @@ ip4_field
 ip4_expr
 	: ip4_field field_expr skip_white '=' skip_white field_value_expr
 		{ proto_field_expr_eval(); }
-	| ip4_field skip_white '=' skip_white field_value_expr
-		{ proto_field_expr_eval(); }
 	| K_DF  { proto_hdr_field_set_be16(hdr, IP4_DF, 1); }
 	| K_MF  { proto_hdr_field_set_be16(hdr, IP4_MF, 1); }
 	;
@@ -1081,8 +1065,6 @@ ip6_field
 ip6_expr
 	: ip6_field field_expr skip_white '=' skip_white field_value_expr
 		{ proto_field_expr_eval(); }
-	| ip6_field skip_white '=' skip_white field_value_expr
-		{ proto_field_expr_eval(); }
 	;
 
 ip6
@@ -1111,8 +1093,6 @@ icmp4_field
 icmp4_expr
 	: icmp4_field field_expr skip_white '=' skip_white field_value_expr
 		{ proto_field_expr_eval(); }
-	| icmp4_field skip_white '=' skip_white field_value_expr
-		{ proto_field_expr_eval(); }
 	| K_ECHO_REQUEST
 		{ proto_hdr_field_set_u8(hdr, ICMPV4_TYPE, ICMP_ECHO);
 		  proto_hdr_field_set_u8(hdr, ICMPV4_CODE, 0); }
@@ -1127,7 +1107,6 @@ icmp4
 
 icmpv6_proto
 	: icmp6 '(' icmp6_param_list ')' { }
-	;
 
 icmp6_param_list
 	: { }
@@ -1143,12 +1122,7 @@ icmp6_field
 icmp6_expr
 	: icmp6_field field_expr skip_white '=' skip_white field_value_expr
 		{ proto_field_expr_eval(); }
-	| icmp6_field skip_white '=' skip_white field_value_expr
-		{ proto_field_expr_eval(); }
 	| K_TYPE field_expr skip_white '=' skip_white field_value_expr
-		{ proto_field_set(ICMPV6_TYPE);
-		  proto_field_expr_eval(); }
-	| K_TYPE skip_white '=' skip_white field_value_expr
 		{ proto_field_set(ICMPV6_TYPE);
 		  proto_field_expr_eval(); }
 	| K_TYPE skip_white '=' K_ECHO_REQUEST
@@ -1184,8 +1158,6 @@ udp_field
 udp_expr
 	: udp_field field_expr skip_white '=' skip_white field_value_expr
 		{ proto_field_expr_eval(); }
-	| udp_field skip_white '=' skip_white field_value_expr
-		{ proto_field_expr_eval(); }
 	;
 
 udp
@@ -1215,8 +1187,6 @@ tcp_field
 
 tcp_expr
 	: tcp_field field_expr skip_white '=' skip_white field_value_expr
-		{ proto_field_expr_eval(); }
-	| tcp_field skip_white '=' skip_white field_value_expr
 		{ proto_field_expr_eval(); }
 	| K_CWR { proto_hdr_field_set_be16(hdr, TCP_CWR, 1); }
 	| K_ECE { proto_hdr_field_set_be16(hdr, TCP_ECE, 1); }

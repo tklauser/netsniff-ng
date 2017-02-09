@@ -277,7 +277,7 @@ ip6_addr	({v680}|{v67}|{v66}|{v65}|{v64}|{v63}|{v62}|{v61}|{v60})
 "\""[^\"]+"\""	{ yylval.str = try_convert_shellcode(xstrdup(yytext));
 		  return string; }
 
-([ \t\n]+)?	{ return K_WHITE; }
+([ \t\n]+)?	{ }
 
 "/*"([^\*]|\*[^/])*"*/" { return K_COMMENT; }
 
